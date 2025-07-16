@@ -1,17 +1,23 @@
 <div class="users-container">
-    <h1 class="users-heading">Users Count <%= @users.length%></h1>
+  <h1 class="users-heading">Users Count: <%= @users.length %></h1>
+
+  <div class="users-grid">
     <% @users.each do |user| %>
-        <%= link_to user_path(user.id), class:"text-dec" do %>
+      <%= link_to user_path(user.id), class: "user-link" do %>
         <div class="user-box">
-            <img class="user-img" src="<%= user.photo %>" alt=<%= user.name %>/>
-            <div class="user-info-box">
-                <h2 class="user-name"><%= user.name %></h2>
-                <p class="user-post-count">Number of posts: <%= user.posts_counter%></p>
-            </div>
+<%= image_tag user.image.attached? ? url_for(user.image) : asset_path('default_user.png'), class: "user-img", alt: user.name %>
+          <div class="user-info-box">
+            <h2 class="user-name"><%= user.name %></h2>
+            <p class="user-post-count">Number of posts: <%= user.posts_counter %></p>
+          </div>
         </div>
-        <% end%>
-        <% end %>
-        <%= link_to new_user_post_path(current_user), class:"text-dec" do %>
-        <button class="button">Create a post</button>
-        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="create-post-button">
+    <%= link_to new_user_post_path(current_user) do %>
+      <button class="button">Create a post</button>
+    <% end %>
+  </div>
 </div>

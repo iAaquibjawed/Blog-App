@@ -216,3 +216,85 @@
   padding: 5px;
   resize: vertical;
 }
+.users-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.users-heading {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.users-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.user-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.user-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  width: 200px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.user-box:hover {
+  transform: translateY(-4px);
+}
+
+.user-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 12px;
+}
+
+.user-info-box {
+  text-align: center;
+}
+
+.user-name {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.user-post-count {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.create-post-button {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #45a049;
+}

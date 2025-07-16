@@ -1,6 +1,6 @@
 <div class="users-container">
     <div class="user-box">
-        <img class="user-img" src="<%= @user.photo %>" alt="user"/>
+        <%= image_tag @user.image, class: "user-img", alt: "user" if @user.image.attached? %>
         <div class="user-info-box">
             <h2 class="user-name"><%= @user.name %></h2>
             <p class="user-post-count">Number of posts: <%= @user.posts_counter%></p>
