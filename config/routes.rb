@@ -17,7 +17,7 @@ Rails.application.routes.draw do
     resources :likes, only: :create
   end
 
-  root 'users#index'
+  root 'home#index'
 
   delete '/users/:user_id/posts/:post_id', to: 'posts#destroy', as: 'delete_user_post'
   delete '/users/:user_id/posts/:post_id/comments/:comment_id', to: 'comments#destroy', as: 'delete_user_post_comment'
