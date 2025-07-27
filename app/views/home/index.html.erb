@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Auto-Scaling Blog Platform</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-nav {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-signin {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-signup {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .welcome-text {
+            color: white;
+            margin-right: 1rem;
+            font-weight: 600;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            padding-top: 6rem;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="200" cy="200" r="100" fill="white" opacity="0.1"><animate attributeName="r" values="100;150;100" dur="3s" repeatCount="indefinite"/></circle><circle cx="800" cy="300" r="80" fill="white" opacity="0.1"><animate attributeName="r" values="80;120;80" dur="4s" repeatCount="indefinite"/></circle></svg>') no-repeat center;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
+            to { box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffffff, #f0f8ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-section {
+            margin-top: 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 5rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: white;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            color: white;
+        }
+
+        .demo-preview {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metrics-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .metric-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero-section {
+                padding-top: 8rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <%= link_to root_path, class: "logo" do %>
+                🤖 AI Auto-Scale Blog
+            <% end %>
+            <div class="auth-buttons">
+                <% if user_signed_in? %>
+                    <span class="welcome-text">Welcome, <%= current_user.name %></span>
+                    <%= link_to "Dashboard", users_path, class: "btn-nav btn-signin" %>
+                    <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "btn-nav btn-signout" %>
+                <% else %>
+                    <%= link_to "Sign In", new_user_session_path, class: "btn-nav btn-signin" %>
+                    <%= link_to "Get Started", new_user_registration_path, class: "btn-nav btn-signup" %>
+                <% end %>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-background"></div>
+
+        <div class="hero-content">
+            <div class="ai-badge">🚀 AI-Powered Infrastructure Demo</div>
+
+            <h1 class="main-title">Smart Blog Platform with Auto-Scaling AI</h1>
+
+            <p class="subtitle">
+                Experience the future of web applications. Our AI automatically scales infrastructure based on real-time traffic, ensuring optimal performance while reducing costs by up to 60%.
+            </p>
+            <% if user_signed_in? %>
+                <div class="cta-section">
+                    <div class="cta-buttons">
+                        <%= link_to new_post_path, class: "btn btn-primary" do %>
+                            🚀 Start Creating Posts
+                        <% end %>
+                        <a href="#demo" class="btn btn-secondary">
+                            📊 See Live Demo
+                        </a>
+                    </div>
+                </div>
+            <% end %>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="features-container">
+            <h2 class="section-title">Why Choose AI Auto-Scaling?</h2>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="feature-title">Lightning Fast</h3>
+                    <p class="feature-description">
+                        AI predicts traffic spikes and scales resources in under 3 seconds, maintaining sub-100ms response times even during viral content moments.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">💰</span>
+                    <h3 class="feature-title">Cost Efficient</h3>
+                    <p class="feature-description">
+                        Pay only for what you use. Our AI optimizes resource allocation, reducing infrastructure costs while maintaining peak performance.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🛡️</span>
+                    <h3 class="feature-title">99.9% Uptime</h3>
+                    <p class="feature-description">
+                        Advanced monitoring and predictive scaling ensure your blog stays online, even during unexpected traffic surges from social media.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🎯</span>
+                    <h3 class="feature-title">Smart Analytics</h3>
+                    <p class="feature-description">
+                        Real-time insights into user behavior, performance metrics, and scaling decisions help you understand your audience better.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔄</span>
+                    <h3 class="feature-title">Auto-Everything</h3>
+                    <p class="feature-description">
+                        From server provisioning to load balancing, our AI handles the complex infrastructure so you can focus on creating amazing content.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📈</span>
+                    <h3 class="feature-title">Predictive Scaling</h3>
+                    <p class="feature-description">
+                        Machine learning models analyze patterns to scale infrastructure before demand peaks, preventing slowdowns proactively.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo-section" id="demo">
+        <div class="demo-container">
+            <h2 class="section-title">Live Scaling Metrics</h2>
+            <p>Watch our AI in action - these metrics update in real-time as users interact with the platform.</p>
+
+            <div class="demo-preview">
+                <div class="metrics-display">
+                    <div class="metric-item">
+                        <div class="metric-value" id="active-users">247</div>
+                        <div class="metric-label">Active Users</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="server-instances">4</div>
+                        <div class="metric-label">Active Servers</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="response-time">89ms</div>
+                        <div class="metric-label">Avg Response</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="cost-savings">62%</div>
+                        <div class="metric-label">Cost Reduction</div>
+                    </div>
+                </div>
+
+                <p style="margin-top: 2rem; opacity: 0.8;">
+                    🎯 AI Status: <span style="color: #4ade80; font-weight: 600;">Optimizing Performance</span>
+                </p>
+            </div>
+
+            <div class="cta-buttons">
+                <% if user_signed_in? %>
+                    <%= link_to users_path, class: "btn btn-primary" do %>
+                        📊 Access Dashboard
+                    <% end %>
+                <% else %>
+                    <%= link_to new_user_registration_path, class: "btn btn-primary" do %>
+                        Join the Platform
+                    <% end %>
+                <% end %>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 AI Auto-Scaling Blog Platform. Powered by intelligent infrastructure.</p>
+    </footer>
+
+    <script>
+        // Simulate real-time metrics
+        function updateMetrics() {
+            const activeUsers = document.getElementById('active-users');
+            const serverInstances = document.getElementById('server-instances');
+            const responseTime = document.getElementById('response-time');
+            const costSavings = document.getElementById('cost-savings');
+
+            setInterval(() => {
+                // Simulate fluctuating metrics
+                const users = 200 + Math.floor(Math.random() * 100);
+                const servers = Math.max(2, Math.floor(users / 60));
+                const response = 70 + Math.floor(Math.random() * 30);
+                const savings = 55 + Math.floor(Math.random() * 15);
+
+                activeUsers.textContent = users;
+                serverInstances.textContent = servers;
+                responseTime.textContent = response + 'ms';
+                costSavings.textContent = savings + '%';
+            }, 3000);
+        }
+
+        // Smooth scroll for demo link
+        const demoLink = document.querySelector('a[href="#demo"]');
+        if (demoLink) {
+            demoLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateMetrics();
+        });
+    </script>
+</body>
+</html>
