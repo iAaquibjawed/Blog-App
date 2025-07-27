@@ -1,22 +1,875 @@
-<div class="users-container">
-    <div class="user-recent-post">
-        <div class="post-inf-box">
-            <h2 class="user-post-title">Post: #<%= @post.title %> by <%= @post.author.name %></h2>
-            <h3>Comments: <%= @post.comments_counter%>, Likes: <%= @post.likes_counter %><h3>
-            <% if can? :detroy, @post %>
-                <%= button_to 'Delete post', delete_user_post_path(current_user, @post), class: "btn_delete_comment", method: :delete %>
-            <% end %>
-        </div>
-        <p class="user-post-text"><%= @post.text %></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post View - AI Auto-Scaling Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: #4f46e5;
+        }
+
+        .ai-metrics {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .metric-badge {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+
+        /* Post Content */
+        .post-content {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .post-body {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #374151;
+            margin-bottom: 2rem;
+        }
+
+        .post-body p {
+            margin-bottom: 1rem;
+        }
+
+        /* Engagement Section */
+        .engagement-section {
+            border-top: 2px solid rgba(102, 126, 234, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .engagement-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-like {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+        }
+
+        .btn-comment {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 2rem;
+        }
+
+        .comments-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comment-form {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+            margin-bottom: 1rem;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .comment-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .comment-time {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .comment-text {
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        /* AI Sidebar */
+        .ai-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .ai-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Performance Metrics */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .perf-metric {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+
+        .perf-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .perf-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* Scaling Alert */
+        .scaling-alert {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: #22c55e;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-text {
+            font-size: 0.9rem;
+            color: #065f46;
+            line-height: 1.4;
+        }
+
+        /* Real-time Graph */
+        .graph-container {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .graph-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .graph-bars {
+            display: flex;
+            align-items: end;
+            gap: 4px;
+            height: 60px;
+            justify-content: space-between;
+        }
+
+        .graph-bar {
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 2px;
+            flex: 1;
+            min-height: 10px;
+            animation: growBar 1s ease-out;
+        }
+
+        @keyframes growBar {
+            from { height: 0; }
+            to { height: var(--bar-height); }
+        }
+
+        /* AI Insights */
+        .ai-insight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-insight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .ai-metrics {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .post-stats {
+                margin-left: 0;
+            }
+
+            .engagement-buttons {
+                flex-direction: column;
+            }
+
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="/users" class="back-btn">
+                ← Back to Dashboard
+            </a>
+
+            <div class="ai-metrics">
+                <span class="metric-badge" id="load-time">Load: 89ms</span>
+                <span class="metric-badge" id="server-response">Server: Optimal</span>
+                <span class="metric-badge" id="cache-status">Cache: Hit</span>
+            </div>
+
+            <div class="ai-status">
+                <span>📊</span>
+                <span>Scaling Active</span>
+            </div>
         </div>
-        <div class="comment-box">
-            <% @comments.each do |comment|%>
-                <h3 class="comments"><%= comment.author.name %>:  <%= comment.text %></h3>
-                <% if can? :detroy, comment %>
-                    <%= button_to 'Delete comment', delete_user_post_comment_path(current_user, @post, comment), class: "btn_delete_comment", method: :delete %>
-                <% end %>
-            <% end %>
-        </div>
-  </div>
-</div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Post Content -->
+        <main class="post-content">
+            <header class="post-header">
+                <h1 class="post-title">The Future of Web Development: AI-Powered Infrastructure</h1>
+
+                <div class="post-meta">
+                    <div class="author-info">
+                        <div class="author-avatar">JD</div>
+                        <div>
+                            <div style="font-weight: 600; color: #374151;">John Doe</div>
+                            <div>Published 2 hours ago</div>
+                        </div>
+                    </div>
+
+                    <div class="post-stats">
+                        <span class="stat-item">
+                            👁️ <span id="view-count">247</span>
+                        </span>
+                        <span class="stat-item">
+                            ❤️ <span id="like-count">18</span>
+                        </span>
+                        <span class="stat-item">
+                            💬 <span id="comment-count">5</span>
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <article class="post-body">
+                <p>
+                    Today I want to share my thoughts on how AI is revolutionizing web infrastructure.
+                    As developers, we've always dreamed of systems that could adapt and scale automatically
+                    based on real user needs, and that future is finally here.
+                </p>
+
+                <p>
+                    What excites me most about AI-powered auto-scaling is not just the technical capabilities,
+                    but how it fundamentally changes our relationship with infrastructure. Instead of spending
+                    hours configuring servers and predicting traffic patterns, we can focus on what really
+                    matters: building amazing user experiences.
+                </p>
+
+                <p>
+                    The platform we're using right now is a perfect example. Every time someone reads this post,
+                    AI algorithms are analyzing the load, predicting future traffic, and making micro-adjustments
+                    to ensure optimal performance. It's like having a team of expert DevOps engineers working
+                    24/7, but powered by machine learning.
+                </p>
+
+                <p>
+                    What do you think about this shift towards intelligent infrastructure? Have you noticed
+                    any performance improvements while using modern platforms? I'd love to hear your thoughts!
+                </p>
+            </article>
+
+            <section class="engagement-section">
+                <div class="engagement-buttons">
+                    <button class="btn btn-like" onclick="handleLike()">
+                        ❤️ Like Post
+                    </button>
+                    <button class="btn btn-comment" onclick="focusCommentBox()">
+                        💬 Add Comment
+                    </button>
+                </div>
+
+                <div class="comments-section">
+                    <h3 class="comments-title">
+                        💬 Comments (5)
+                    </h3>
+
+                    <form class="comment-form" onsubmit="handleComment(event)">
+                        <textarea
+                            class="comment-input"
+                            placeholder="Share your thoughts on AI auto-scaling..."
+                            id="comment-box"
+                            required
+                        ></textarea>
+                        <button type="submit" class="btn btn-like">
+                            📝 Post Comment
+                        </button>
+                    </form>
+
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">Sarah Miller</span>
+                            <span class="comment-time">1 hour ago</span>
+                        </div>
+                        <div class="comment-text">
+                            This is fascinating! I've definitely noticed how fast this platform loads compared to traditional blogs. The AI optimization is really impressive.
+                        </div>
+                    </div>
+
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">Alex Chen</span>
+                            <span class="comment-time">45 minutes ago</span>
+                        </div>
+                        <div class="comment-text">
+                            As a developer, I'm curious about the technical implementation. How does the AI predict traffic spikes? Are you using machine learning models?
+                        </div>
+                    </div>
+
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">Maria Rodriguez</span>
+                            <span class="comment-time">30 minutes ago</span>
+                        </div>
+                        <div class="comment-text">
+                            The cost savings alone make this worth it. Our startup can't afford to over-provision servers, so AI scaling is a game-changer for us.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- AI Sidebar -->
+        <aside class="ai-sidebar">
+            <!-- Real-time Performance -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    ⚡ Real-time Performance
+                </h3>
+
+                <div class="scaling-alert">
+                    <div class="alert-title">
+                        🎯 Optimal State
+                    </div>
+                    <div class="alert-text">
+                        AI has optimized this post's delivery for your current traffic pattern.
+                    </div>
+                </div>
+
+                <div class="performance-grid">
+                    <div class="perf-metric">
+                        <div class="perf-value" id="page-speed">89ms</div>
+                        <div class="perf-label">Load Time</div>
+                    </div>
+                    <div class="perf-metric">
+                        <div class="perf-value" id="server-health">98%</div>
+                        <div class="perf-label">Server Health</div>
+                    </div>
+                </div>
+
+                <div class="graph-container">
+                    <div class="graph-title">Traffic Pattern (Last Hour)</div>
+                    <div class="graph-bars">
+                        <div class="graph-bar" style="--bar-height: 30px;"></div>
+                        <div class="graph-bar" style="--bar-height: 45px;"></div>
+                        <div class="graph-bar" style="--bar-height: 35px;"></div>
+                        <div class="graph-bar" style="--bar-height: 55px;"></div>
+                        <div class="graph-bar" style="--bar-height: 40px;"></div>
+                        <div class="graph-bar" style="--bar-height: 50px;"></div>
+                        <div class="graph-bar" style="--bar-height: 45px;"></div>
+                        <div class="graph-bar" style="--bar-height: 60px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    🧠 AI Analysis
+                </h3>
+
+                <div class="ai-insight" id="ai-analysis">
+                    This post is trending! AI detected 40% above-average engagement.
+                    Server resources automatically scaled up by 25% to handle increased traffic.
+                </div>
+            </div>
+
+            <!-- Engagement Analytics -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    📈 Engagement Analytics
+                </h3>
+
+                <div class="performance-grid">
+                    <div class="perf-metric">
+                        <div class="perf-value" id="engagement-rate">92%</div>
+                        <div class="perf-label">Engagement Rate</div>
+                    </div>
+                    <div class="perf-metric">
+                        <div class="perf-value" id="read-time">3.2m</div>
+                        <div class="perf-label">Avg Read Time</div>
+                    </div>
+                </div>
+
+                <div class="alert-text" style="margin-top: 1rem; font-size: 0.9rem; color: #065f46;">
+                    <strong>AI Prediction:</strong> This post will likely receive 50+ more views in the next 2 hours.
+                </div>
+            </div>
+
+            <!-- Infrastructure Status -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    🖥️ Infrastructure Status
+                </h3>
+
+                <div class="performance-grid">
+                    <div class="perf-metric">
+                        <div class="perf-value" id="active-servers">4</div>
+                        <div class="perf-label">Active Servers</div>
+                    </div>
+                    <div class="perf-metric">
+                        <div class="perf-value" id="cpu-usage">23%</div>
+                        <div class="perf-label">CPU Usage</div>
+                    </div>
+                </div>
+
+                <div class="alert-text" style="margin-top: 1rem; font-size: 0.9rem;">
+                    🤖 <strong>AI Status:</strong> <span id="ai-status-text">Monitoring and optimizing performance</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // Real-time metrics simulation
+        function updateMetrics() {
+            const elements = {
+                viewCount: document.getElementById('view-count'),
+                likeCount: document.getElementById('like-count'),
+                commentCount: document.getElementById('comment-count'),
+                pageSpeed: document.getElementById('page-speed'),
+                serverHealth: document.getElementById('server-health'),
+                engagementRate: document.getElementById('engagement-rate'),
+                activeServers: document.getElementById('active-servers'),
+                cpuUsage: document.getElementById('cpu-usage'),
+                loadTime: document.getElementById('load-time'),
+                aiStatusText: document.getElementById('ai-status-text')
+            };
+
+            const aiStatuses = [
+                "Monitoring and optimizing performance",
+                "Scaling resources based on traffic",
+                "Analyzing engagement patterns",
+                "Optimizing database queries",
+                "Adjusting cache strategies",
+                "Predicting traffic spikes"
+            ];
+
+            setInterval(() => {
+                // Simulate gradual increases in engagement
+                const currentViews = parseInt(elements.viewCount.textContent);
+                const currentLikes = parseInt(elements.likeCount.textContent);
+
+                if (Math.random() < 0.3) {
+                    elements.viewCount.textContent = currentViews + Math.floor(Math.random() * 3) + 1;
+                }
+
+                if (Math.random() < 0.2) {
+                    elements.likeCount.textContent = currentLikes + 1;
+                }
+
+                // Update performance metrics
+                const speed = 70 + Math.floor(Math.random() * 30);
+                const health = 95 + Math.floor(Math.random() * 5);
+                const engagement = 85 + Math.floor(Math.random() * 15);
+                const servers = Math.max(3, Math.floor((currentViews + 50) / 80));
+                const cpu = 15 + Math.floor(Math.random() * 25);
+
+                elements.pageSpeed.textContent = speed + 'ms';
+                elements.serverHealth.textContent = health + '%';
+                elements.engagementRate.textContent = engagement + '%';
+                elements.activeServers.textContent = servers;
+                elements.cpuUsage.textContent = cpu + '%';
+                elements.loadTime.textContent = `Load: ${speed}ms`;
+
+                // Update AI status
+                if (Math.random() < 0.3) {
+                    elements.aiStatusText.textContent = aiStatuses[Math.floor(Math.random() * aiStatuses.length)];
+                }
+            }, 4000);
+        }
+
+        // Handle like button
+        function handleLike() {
+            const likeBtn = document.querySelector('.btn-like');
+            const likeCount = document.getElementById('like-count');
+
+            likeBtn.style.transform = 'scale(1.1)';
+            likeBtn.style.background = 'linear-gradient(45deg, #22c55e, #16a34a)';
+            likeBtn.innerHTML = '✅ Liked!';
+
+            const current = parseInt(likeCount.textContent);
+            likeCount.textContent = current + 1;
+
+            setTimeout(() => {
+                likeBtn.style.transform = 'scale(1)';
+                likeBtn.innerHTML = '❤️ Like Post';
+                likeBtn.style.background = 'linear-gradient(45deg, #ff6b6b, #ffa500)';
+            }, 2000);
+        }
+
+        // Focus comment box
+        function focusCommentBox() {
+            document.getElementById('comment-box').focus();
+        }
+
+        // Handle comment submission
+        function handleComment(event) {
+            event.preventDefault();
+            const commentBox = document.getElementById('comment-box');
+            const commentText = commentBox.value.trim();
+
+            if (commentText) {
+                // Create new comment element
+                const commentsSection = document.querySelector('.comments-section');
+                const newComment = document.createElement('div');
+                newComment.className = 'comment-item';
+                newComment.style.opacity = '0';
+                newComment.style.transform = 'translateY(20px)';
+
+                newComment.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">You</span>
+                        <span class="comment-time">Just now</span>
+                    </div>
+                    <div class="comment-text">${commentText}</div>
+                `;
+
+                // Insert after the form
+                const form = document.querySelector('.comment-form');
+                form.parentNode.insertBefore(newComment, form.nextSibling);
+
+                // Animate in
+                setTimeout(() => {
+                    newComment.style.transition = 'all 0.5s ease';
+                    newComment.style.opacity = '1';
+                    newComment.style.transform = 'translateY(0)';
+                }, 100);
+
+                // Update comment count
+                const commentCount = document.getElementById('comment-count');
+                const current = parseInt(commentCount.textContent);
+                commentCount.textContent = current + 1;
+
+                // Update title
+                const title = document.querySelector('.comments-title');
+                title.textContent = `💬 Comments (${current + 1})`;
+
+                // Clear form
+                commentBox.value = '';
+
+                // Show AI feedback
+                setTimeout(() => {
+                    const aiAnalysis = document.getElementById('ai-analysis');
+                    aiAnalysis.textContent = 'New comment detected! AI optimizing content delivery and engagement algorithms.';
+                }, 1000);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateMetrics();
+
+            // Add smooth scroll for comment focus
+            document.querySelector('.btn-comment').addEventListener('click', () => {
+                document.getElementById('comment-box').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            });
+        });
+
+        // Update AI insights periodically
+        const aiInsights = [
+            "Traffic spike detected! AI scaling infrastructure to maintain optimal performance.",
+            "High engagement rate observed. AI pre-loading related content for better user experience.",
+            "Machine learning model predicts 25% more views in the next hour.",
+            "AI optimized database queries resulted in 15% faster load times.",
+            "Content popularity algorithm updated based on current engagement patterns.",
+            "Predictive scaling activated due to social media sharing patterns."
+        ];
+
+        setInterval(() => {
+            if (Math.random() < 0.4) {
+                const aiAnalysis = document.getElementById('ai-analysis');
+                aiAnalysis.textContent = aiInsights[Math.floor(Math.random() * aiInsights.length)];
+            }
+        }, 8000);
+    </script>
+</body>
+</html>
