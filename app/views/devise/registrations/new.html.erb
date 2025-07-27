@@ -1,39 +1,506 @@
-<h2>Sign up</h2>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 2rem 0;
+  }
 
+  .signup-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+    margin: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+  .signup-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(45deg, #667eea, #764ba2, #ff6b6b, #ffa500);
+    background-size: 400% 400%;
+    animation: gradientShift 4s ease infinite;
+  }
 
-  <div class="field">
-    <%= f.label :name %><br />
-    <%= f.text_field :name %>
-  </div>
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 50% 50%; }
+    75% { background-position: 100% 50%; }
+  }
 
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-  </div>
+  .back-home {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
 
-  <div class="field">
-    <%= f.label :image, "Profile Image" %><br />
-    <%= f.file_field :image %>
-  </div>
-  <div class="field">
-    <%= f.label :password %>
-    <% if @minimum_password_length %>
-    <em>(<%= @minimum_password_length %> characters minimum)</em>
-    <% end %><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-  </div>
+  .back-home:hover {
+    opacity: 0.8;
+  }
 
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
+  .signup-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
 
-  <div class="actions">
-    <%= f.submit "Sign up" %>
-  </div>
+  .signup-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.5rem;
+  }
+
+  .ai-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .ai-badge {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  .benefits-preview {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+  }
+
+  .benefits-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .benefits-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .benefits-list li {
+    color: #4b5563;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .field {
+    margin-bottom: 1.5rem;
+  }
+
+  .field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+    font-size: 1rem;
+  }
+
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="password"],
+  .field input[type="file"] {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .field input[type="text"]:focus,
+  .field input[type="email"]:focus,
+  .field input[type="password"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .field input[type="text"]:hover,
+  .field input[type="email"]:hover,
+  .field input[type="password"]:hover {
+    border-color: #9ca3af;
+  }
+
+  .field input[type="file"] {
+    padding: 0.75rem;
+    background: rgba(248, 250, 252, 0.9);
+    border-style: dashed;
+  }
+
+  .field input[type="file"]:hover {
+    background: rgba(241, 245, 249, 0.9);
+    border-color: #667eea;
+  }
+
+  .password-hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+
+  .password-strength {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .strength-bar {
+    height: 4px;
+    flex: 1;
+    background: #e5e7eb;
+    border-radius: 2px;
+    transition: background 0.3s ease;
+  }
+
+  .strength-bar.weak { background: #ef4444; }
+  .strength-bar.medium { background: #f59e0b; }
+  .strength-bar.strong { background: #22c55e; }
+
+  .actions {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .signup-button {
+    width: 100%;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .signup-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .signup-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .signup-button:hover::before {
+    left: 100%;
+  }
+
+  .signup-button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .devise-links {
+    text-align: center;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+  }
+
+  .devise-links a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 0 0.5rem;
+    transition: color 0.3s ease;
+    display: inline-block;
+    padding: 0.5rem;
+  }
+
+  .devise-links a:hover {
+    color: #4f46e5;
+    text-decoration: underline;
+  }
+
+  /* Error messages */
+  .error-messages {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #dc2626;
+  }
+
+  .error-messages h2 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .error-messages ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .error-messages li {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    body {
+      padding: 1rem 0;
+    }
+
+    .signup-container {
+      margin: 1rem;
+      padding: 2rem;
+    }
+
+    .signup-title {
+      font-size: 1.8rem;
+    }
+
+    .back-home {
+      position: relative;
+      top: auto;
+      left: auto;
+      margin-bottom: 1rem;
+      color: #667eea;
+      justify-content: center;
+    }
+
+    .benefits-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .signup-container {
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<%= link_to root_path, class: "back-home" do %>
+  ← Back to Home
 <% end %>
 
-<%= render "devise/shared/links" %>
+<div class="signup-container">
+  <div class="signup-header">
+    <h2 class="signup-title">Join AI Platform</h2>
+    <div class="ai-subtitle">
+      <span class="ai-badge">🚀 Get Started</span>
+      Create your intelligent dashboard account
+    </div>
+  </div>
+
+  <div class="benefits-preview">
+    <h3 class="benefits-title">
+      ✨ What you'll unlock:
+    </h3>
+    <ul class="benefits-list">
+      <li>⚡ AI-optimized performance</li>
+      <li>💰 60% cost reduction</li>
+      <li>📊 Real-time analytics</li>
+      <li>🛡️ 99.9% uptime</li>
+      <li>🤖 Smart scaling</li>
+      <li>🎯 Predictive insights</li>
+    </ul>
+  </div>
+
+  <% if resource.errors.any? %>
+    <div class="error-messages">
+      <h2>
+        <%= I18n.t("errors.messages.not_saved", count: resource.errors.count, resource: resource.class.model_name.human.downcase) %>
+      </h2>
+      <ul>
+        <% resource.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+    <div class="field">
+      <%= f.label :name, "Full Name" %>
+      <%= f.text_field :name, autofocus: true, required: true, placeholder: "Enter your full name" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :email, "Email Address" %>
+      <%= f.email_field :email, autocomplete: "email", required: true, placeholder: "Enter your email address" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :image, "Profile Image (Optional)" %>
+      <%= f.file_field :image, accept: "image/*" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :password, "Password" %>
+      <% if @minimum_password_length %>
+        <div class="password-hint">
+          Minimum <%= @minimum_password_length %> characters required
+        </div>
+      <% end %>
+      <%= f.password_field :password, autocomplete: "new-password", required: true, placeholder: "Create a secure password", id: "password-input" %>
+      <div class="password-strength" id="password-strength">
+        <div class="strength-bar"></div>
+        <div class="strength-bar"></div>
+        <div class="strength-bar"></div>
+        <div class="strength-bar"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <%= f.label :password_confirmation, "Confirm Password" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true, placeholder: "Confirm your password", id: "password-confirm" %>
+    </div>
+
+    <div class="actions">
+      <%= f.submit "🚀 Create Account & Start Building", class: "signup-button" %>
+    </div>
+  <% end %>
+
+  <div class="devise-links">
+    <%= render "devise/shared/links" %>
+  </div>
+</div>
+
+<script>
+  // Enhanced form interactions
+  document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]').forEach(input => {
+    input.addEventListener('focus', () => {
+      input.style.transform = 'translateY(-2px)';
+      input.style.transition = 'all 0.3s ease';
+    });
+
+    input.addEventListener('blur', () => {
+      input.style.transform = 'translateY(0)';
+    });
+  });
+
+  // Password strength indicator
+  const passwordInput = document.getElementById('password-input');
+  const passwordConfirm = document.getElementById('password-confirm');
+  const strengthBars = document.querySelectorAll('.strength-bar');
+
+  function checkPasswordStrength(password) {
+    let strength = 0;
+
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    return Math.min(strength, 4);
+  }
+
+  function updateStrengthIndicator(strength) {
+    strengthBars.forEach((bar, index) => {
+      bar.className = 'strength-bar';
+      if (index < strength) {
+        if (strength <= 2) bar.classList.add('weak');
+        else if (strength <= 3) bar.classList.add('medium');
+        else bar.classList.add('strong');
+      }
+    });
+  }
+
+  function checkPasswordMatch() {
+    if (passwordConfirm.value && passwordInput.value !== passwordConfirm.value) {
+      passwordConfirm.style.borderColor = '#ef4444';
+      passwordConfirm.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+    } else {
+      passwordConfirm.style.borderColor = '#e5e7eb';
+      passwordConfirm.style.boxShadow = 'none';
+    }
+  }
+
+  passwordInput.addEventListener('input', (e) => {
+    const strength = checkPasswordStrength(e.target.value);
+    updateStrengthIndicator(strength);
+    checkPasswordMatch();
+  });
+
+  passwordConfirm.addEventListener('input', checkPasswordMatch);
+
+  // Loading state for submit button
+  document.querySelector('form').addEventListener('submit', (e) => {
+    const submitBtn = document.querySelector('.signup-button');
+    submitBtn.innerHTML = '🔄 Creating Your Account...';
+    submitBtn.disabled = true;
+  });
+
+  // File input enhancement
+  const fileInput = document.querySelector('input[type="file"]');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const fileName = e.target.files[0]?.name;
+      if (fileName) {
+        const label = fileInput.previousElementSibling;
+        label.textContent = `Profile Image: ${fileName}`;
+        label.style.color = '#22c55e';
+      }
+    });
+  }
+</script>
