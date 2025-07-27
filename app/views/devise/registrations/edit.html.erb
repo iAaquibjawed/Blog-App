@@ -1,43 +1,521 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 2rem 0;
+  }
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+  .edit-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
 
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-  </div>
+  .profile-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
 
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-  <% end %>
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(45deg, #667eea, #764ba2, #22c55e, #ffa500);
+    background-size: 400% 400%;
+    animation: gradientShift 4s ease infinite;
+  }
 
-  <div class="field">
-    <%= f.label :password %> <i>(leave blank if you don't want to change it)</i><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-    <% if @minimum_password_length %>
-      <br />
-      <em><%= @minimum_password_length %> characters minimum</em>
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 50% 50%; }
+    75% { background-position: 100% 50%; }
+  }
+
+  .back-link {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
+
+  .back-link:hover {
+    opacity: 0.8;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .profile-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.5rem;
+  }
+
+  .ai-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .ai-badge {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  .profile-sections {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .section {
+    background: rgba(248, 250, 252, 0.5);
+    border-radius: 15px;
+    padding: 2rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .field {
+    margin-bottom: 1.5rem;
+  }
+
+  .field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+    font-size: 1rem;
+  }
+
+  .field-hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-style: italic;
+    margin-left: 0.5rem;
+  }
+
+  .field input[type="email"],
+  .field input[type="password"] {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .field input[type="email"]:focus,
+  .field input[type="password"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .field input[type="email"]:hover,
+  .field input[type="password"]:hover {
+    border-color: #9ca3af;
+  }
+
+  .password-hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  .confirmation-notice {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #92400e;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .actions {
+    margin-top: 2rem;
+  }
+
+  .update-button {
+    width: 100%;
+    background: linear-gradient(45deg, #22c55e, #16a34a);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .update-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .update-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+  }
+
+  .update-button:hover::before {
+    left: 100%;
+  }
+
+  .update-button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Danger Zone */
+  .danger-zone {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.1);
+  }
+
+  .danger-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .danger-description {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .delete-button {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+  }
+
+  .delete-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+  }
+
+  /* Error messages */
+  .error-messages {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #dc2626;
+  }
+
+  .error-messages h2 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .error-messages ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .error-messages li {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    body {
+      padding: 1rem 0;
+    }
+
+    .edit-container {
+      padding: 1rem;
+    }
+
+    .profile-card {
+      padding: 2rem;
+    }
+
+    .profile-title {
+      font-size: 1.8rem;
+    }
+
+    .back-link {
+      position: relative;
+      top: auto;
+      left: auto;
+      margin-bottom: 1rem;
+      color: #667eea;
+      justify-content: center;
+    }
+
+    .section {
+      padding: 1.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .profile-card {
+      padding: 1.5rem;
+    }
+
+    .section {
+      padding: 1rem;
+    }
+  }
+</style>
+
+<%= link_to :back, class: "back-link" do %>
+  ← Back to Dashboard
+<% end %>
+
+<div class="edit-container">
+  <div class="profile-card">
+    <div class="profile-header">
+      <h2 class="profile-title">Account Settings</h2>
+      <div class="ai-subtitle">
+        <span class="ai-badge">🔧 Profile Management</span>
+        Update your AI platform account
+      </div>
+    </div>
+
+    <% if resource.errors.any? %>
+      <div class="error-messages">
+        <h2>
+          <%= I18n.t("errors.messages.not_saved", count: resource.errors.count, resource: resource.class.model_name.human.downcase) %>
+        </h2>
+        <ul>
+          <% resource.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+      <div class="profile-sections">
+
+        <!-- Account Information Section -->
+        <div class="section">
+          <h3 class="section-title">
+            📧 Account Information
+          </h3>
+
+          <div class="field">
+            <%= f.label :email, "Email Address" %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Enter your email address" %>
+          </div>
+
+          <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+            <div class="confirmation-notice">
+              ⏳ Currently waiting confirmation for: <strong><%= resource.unconfirmed_email %></strong>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Password Section -->
+        <div class="section">
+          <h3 class="section-title">
+            🔐 Password & Security
+          </h3>
+
+          <div class="field">
+            <%= f.label :password do %>
+              New Password
+              <span class="field-hint">(leave blank if you don't want to change it)</span>
+            <% end %>
+            <%= f.password_field :password, autocomplete: "new-password", placeholder: "Enter new password" %>
+            <% if @minimum_password_length %>
+              <div class="password-hint">
+                Minimum <%= @minimum_password_length %> characters required
+              </div>
+            <% end %>
+          </div>
+
+          <div class="field">
+            <%= f.label :password_confirmation, "Confirm New Password" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", placeholder: "Confirm new password" %>
+          </div>
+
+          <div class="field">
+            <%= f.label :current_password do %>
+              Current Password
+              <span class="field-hint">(required to confirm changes)</span>
+            <% end %>
+            <%= f.password_field :current_password, autocomplete: "current-password", placeholder: "Enter current password", required: true %>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <%= f.submit "💾 Update Account", class: "update-button" %>
+      </div>
     <% end %>
   </div>
 
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+  <!-- Danger Zone -->
+  <div class="danger-zone">
+    <h3 class="danger-title">
+      ⚠️ Danger Zone
+    </h3>
+    <p class="danger-description">
+      Once you delete your account, there is no going back. This action cannot be undone and will permanently delete your account, posts, comments, and all associated data.
+    </p>
+
+    <%= button_to "🗑️ Delete Account", registration_path(resource_name),
+        data: {
+          confirm: "Are you absolutely sure? This action cannot be undone and will permanently delete your account and all data.",
+          turbo_confirm: "Are you absolutely sure? This action cannot be undone and will permanently delete your account and all data."
+        },
+        method: :delete,
+        class: "delete-button" %>
   </div>
+</div>
 
-  <div class="field">
-    <%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i><br />
-    <%= f.password_field :current_password, autocomplete: "current-password" %>
-  </div>
+<script>
+  // Enhanced form interactions
+  document.querySelectorAll('input[type="email"], input[type="password"]').forEach(input => {
+    input.addEventListener('focus', () => {
+      input.style.transform = 'translateY(-2px)';
+      input.style.transition = 'all 0.3s ease';
+    });
 
-  <div class="actions">
-    <%= f.submit "Update" %>
-  </div>
-<% end %>
+    input.addEventListener('blur', () => {
+      input.style.transform = 'translateY(0)';
+    });
+  });
 
-<h3>Cancel my account</h3>
+  // Password confirmation matching
+  const passwordInput = document.querySelector('input[name="user[password]"]');
+  const passwordConfirm = document.querySelector('input[name="user[password_confirmation]"]');
 
-<div>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete %></div>
+  function checkPasswordMatch() {
+    if (passwordConfirm.value && passwordInput.value && passwordInput.value !== passwordConfirm.value) {
+      passwordConfirm.style.borderColor = '#ef4444';
+      passwordConfirm.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+    } else {
+      passwordConfirm.style.borderColor = '#e5e7eb';
+      passwordConfirm.style.boxShadow = 'none';
+    }
+  }
 
-<%= link_to "Back", :back %>
+  if (passwordInput && passwordConfirm) {
+    passwordInput.addEventListener('input', checkPasswordMatch);
+    passwordConfirm.addEventListener('input', checkPasswordMatch);
+  }
+
+  // Loading state for update button
+  document.querySelector('form').addEventListener('submit', (e) => {
+    const submitBtn = document.querySelector('.update-button');
+    submitBtn.innerHTML = '🔄 Updating Account...';
+    submitBtn.disabled = true;
+  });
+
+  // Enhanced delete confirmation
+  const deleteButton = document.querySelector('.delete-button');
+  if (deleteButton) {
+    deleteButton.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      if (confirm('⚠️ FINAL WARNING: This will permanently delete your account and ALL data. Type "DELETE" to confirm:')) {
+        const userConfirmation = prompt('Type "DELETE" to confirm account deletion:');
+        if (userConfirmation === 'DELETE') {
+          // Submit the form
+          deleteButton.closest('form').submit();
+        } else {
+          alert('Account deletion cancelled. Please type "DELETE" exactly to confirm.');
+        }
+      }
+    });
+  }
+
+  // Real-time validation feedback
+  const currentPasswordInput = document.querySelector('input[name="user[current_password]"]');
+  if (currentPasswordInput) {
+    currentPasswordInput.addEventListener('blur', () => {
+      if (!currentPasswordInput.value) {
+        currentPasswordInput.style.borderColor = '#f59e0b';
+        currentPasswordInput.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+      } else {
+        currentPasswordInput.style.borderColor = '#e5e7eb';
+        currentPasswordInput.style.boxShadow = 'none';
+      }
+    });
+  }
+</script>
