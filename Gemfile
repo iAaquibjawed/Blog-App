@@ -65,3 +65,13 @@ gem 'http'
 gem 'aws-sdk-ec2', '~> 1'
 gem 'sidekiq' # for background jobs
 gem 'httparty'
+gem 'activeadmin'
+
+# Plus integrations with:
+gem 'devise'
+gem 'cancancan'
+gem 'draper'
+gem 'pundit'
+gem 'sprockets'
+# Gemfile
+gem 'sassc-rails'

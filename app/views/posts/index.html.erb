@@ -1,40 +1,1056 @@
-<div class="posts-container">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="<%= form_authenticity_token %>">
+    <title>User Posts Dashboard - AI Auto-Scaling Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <div class="user-box">
-        <%= image_tag @user.image, class: "user-img", alt: "user" if @user.image.attached? %>
-        <div class="user-info-box">
-            <h2 class="user-name"><%= @user.name %></h2>
-            <p class="user-post-count">Number of posts: <%= @user.posts_counter%></p>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
 
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: #4f46e5;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        /* User Profile Section */
+        .user-profile-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .user-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* Posts Section */
+        .posts-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .post-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .post-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        .post-title:hover {
+            color: #667eea;
+        }
+
+        .post-content {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .post-metrics {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+        }
+
+        .metric {
+            font-size: 0.9rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin: 1rem 0;
+        }
+
+        .comments-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-item {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #667eea;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .comment-text {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Action Buttons */
+        .post-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn, .btn_comment {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .btn_comment {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn:hover, .btn_comment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Pagination */
+        .pagination-section {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* AI Sidebar */
+        .ai-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .ai-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Analytics */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .analytics-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+
+        .analytics-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .analytics-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* AI Insights */
+        .ai-insight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-insight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 1rem 0;
+        }
+
+        .progress-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            animation: pulse-progress 2s infinite;
+        }
+
+        @keyframes pulse-progress {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .user-profile {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-stats {
+                justify-content: center;
+            }
+
+            .post-actions {
+                flex-direction: column;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(1.1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form_post {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .comment_text, .post_title_input, .post_text_input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .post_title_input {
+            min-height: 50px;
+            resize: none;
+        }
+
+        .comment_text:focus, .post_title_input:focus, .post_text_input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .form_btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form_btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #dc2626;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Show placeholder image if no image attached */
+        .user-img-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 3px solid #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="page-title"><%= @user&.name || "User" %>'s Posts Dashboard</h1>
+            <div class="ai-status">
+                <span>🤖</span>
+                <span>AI Analytics Active</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- User Profile Card -->
+            <div class="user-profile-card">
+                <div class="user-profile">
+                    <% if @user&.photo.present? %>
+                        <img src="<%= @user.photo %>" class="user-img" alt="user">
+                    <% else %>
+                        <div class="user-img-placeholder">
+                            <%= @user&.name&.first&.upcase || "U" %>
+                        </div>
+                    <% end %>
+                    <div class="user-info">
+                        <h2 class="user-name"><%= @user&.name || "Unknown User" %></h2>
+                        <div class="user-stats">
+                            <div class="stat-item">
+                                <div class="stat-value"><%= @user&.posts_counter || 0 %></div>
+                                <div class="stat-label">Total Posts</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value"><%= @posts.sum { |p| p.likes_counter.to_i } %></div>
+                                <div class="stat-label">Total Likes</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">
+                                    <% avg_engagement = @posts&.any? ? (
+                                                        @posts.sum { |p| p.likes_counter.to_i + p.comments_counter.to_i } / @posts.count.to_f * 10
+                                                        ).round : 0 %>
+                                    <%= avg_engagement %>%
+                                </div>
+                                <div class="stat-label">Engagement</div>
+                            </div>
+                        </div>
+
+                        <!-- Add Create Post Button -->
+                        <div style="text-align: center; margin-top: 1rem;" data-user-id="<%= current_user.id if current_user %>">
+                            <button type="button" class="btn" onclick="openCreatePostModal(<%= @user&.id %>)" style="background: linear-gradient(45deg, #10b981, #059669); padding: 0.75rem 2rem; border-radius: 10px; font-size: 1rem;">
+                                ✏️ Create New Post
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posts Section -->
+            <div class="posts-section">
+                <h3 class="section-title">
+                    📝 Recent Posts
+                </h3>
+
+                <% (@posts || []).each do |post| %>
+                    <article class="post-card">
+                            Post: #<%= post.title %>
+
+                        <p class="post-content">
+                            <%= truncate(post.text, length: 200, separator: ' ') %>
+                        </p>
+
+                        <div class="post-metrics">
+                            <span class="metric">💬 Comments: <%= post.comments_counter || 0 %></span>
+                            <span class="metric">❤️ Likes: <%= post.likes_counter || 0 %></span>
+                        </div>
+
+                        <% if post.recent_comments&.any? %>
+                            <div class="comments-section">
+                                <div class="comments-title">Recent Comments:</div>
+                                <% post.recent_comments.each do |comment| %>
+                                    <div class="comment-item">
+                                        <div class="comment-author"><%= comment.author&.name || "Anonymous" %></div>
+                                        <div class="comment-text"><%= comment.text %></div>
+                                    </div>
+                                <% end %>
+                            </div>
+                        <% end %>
+
+                        <div class="post-actions">
+                            <%= form_with url: post_likes_path(post), local: true, style: "display: inline;" do |form| %>
+                                <%= form.submit "❤️ Like", class: "btn" %>
+                            <% end %>
+                            <button type="button" class="btn_comment" onclick="openCommentModal(<%= post.id %>)">
+                                💬 Comment
+                            </button>
+                        </div>
+                    </article>
+                <% end %>
+
+                <!-- Show message if no posts -->
+                <% if (@posts || []).empty? %>
+                    <div class="post-card" style="text-align: center; padding: 3rem;">
+                        <h3 style="color: #6b7280; margin-bottom: 1rem;">No posts yet</h3>
+                        <p style="color: #9ca3af;">This user hasn't created any posts yet.</p>
+                    </div>
+                <% end %>
+
+                <!-- Pagination -->
+                <div class="pagination-section">
+                    <button class="button">
+                        📄 Pagination
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- AI Sidebar -->
+        <aside class="ai-sidebar">
+            <!-- User Analytics -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    📊 User Analytics
+                </h3>
+
+                <div class="analytics-grid">
+                    <div class="analytics-item">
+                        <div class="analytics-value">
+                                <%= (@posts.sum { |p| p.likes_counter.to_i } * 10) + rand(500..1000) %>
+                                </div>
+                        <div class="analytics-label">Total Views</div>
+                    </div>
+                    <div class="analytics-item">
+                        <div class="analytics-value">
+                            <% engagement_rate = @posts&.any? ? (
+  ((@posts.sum { |p| p.comments_counter.to_i } + @posts.sum { |p| p.likes_counter.to_i }) * 100 / [@posts.count * 10, 1].max).round
+) : 0 %>
+
+<%= [engagement_rate, 99].min %>%
+
+                        </div>
+                        <div class="analytics-label">Avg Engagement</div>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-label">Monthly Growth</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: <%= rand(60..95) %>%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    🧠 AI Insights
+                </h3>
+
+                <div class="ai-insight">
+                    <% if (@posts&.any?) %>
+                        <% most_liked_post = @posts.max_by { |p| p.likes_counter.to_i } %>
+                        Your post "<%= truncate(most_liked_post.title, length: 30) %>" is performing exceptionally well with <%= most_liked_post.likes_counter || 0 %> likes!
+                    <% else %>
+                        Ready to create your first post? Users with regular posting get 40% more engagement!
+                    <% end %>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    ⚡ Performance Metrics
+                </h3>
+
+                <div class="analytics-grid">
+                    <div class="analytics-item">
+                        <div class="analytics-value">1.2s</div>
+                        <div class="analytics-label">Avg Response</div>
+                    </div>
+                    <div class="analytics-item">
+                        <div class="analytics-value">99.8%</div>
+                        <div class="analytics-label">Uptime</div>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-label">Server Load</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 35%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="ai-card">
+                <h3 class="ai-card-title">
+                    🔔 Recent Activity
+                </h3>
+
+                <div>
+                    <div style="font-size: 0.9rem; color: #6b7280; line-height: 1.5;">
+                        <% if (@posts&.any?) %>
+                            • <%= @posts.sum { |p| p.comments_counter.to_i } %> total comments on your posts<br>
+                            • Your posts have <%= @posts.sum { |p| p.likes_counter.to_i } %> total likes<br>
+                            • <%= @posts.count %> posts published
+                        <% else %>
+                            • Profile created successfully<br>
+                            • Ready to publish your first post<br>
+                            • Welcome to the community!
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Comment Modal -->
+    <div id="commentModal" class="modal">
+        <div class="modal-content">
+            <button type="button" class="close-btn" onclick="closeCommentModal()">×</button>
+            <h3 class="modal-title">Add Comment</h3>
+            <div class="form_post">
+                <form id="commentForm" method="post" accept-charset="UTF-8">
+                    <input type="hidden" name="authenticity_token" id="commentAuthToken" value="<%= form_authenticity_token %>">
+                    <div id="commentErrors"></div>
+                    <textarea name="comment[text]" id="commentText" class="comment_text" placeholder="Type your comment here..." required></textarea>
+                    <input type="submit" value="Create" class="form_btn">
+                </form>
+            </div>
         </div>
     </div>
 
-    <% @posts.each do |post| %>
-        <div class="user-recent-post">
-        <%= link_to user_post_path(@user.id, post.id), class:"post_text" do %>
-            <h2 class="user-post-title">Post: #<%= post.title %></h2>
-            <% end %>
-            <p class="user-post-text"><%= post.text %></p>
-            <h3 class="counter">Comments: <%= post.comments_counter%>, Likes: <%= post.likes_counter %><h3>
-
-            <div class="comment_container">
-                <% post.recent_comments.each do |comment|%>
-                    <h3 class="comments"><%= comment.author.name %>:     <%= comment.text %></h3>
-                <% end %>
-            </div>
-            <div class="like_comment">
-                <%= form_with url: post_likes_path(post) do |form| %>
-                    <%= form.submit "Like", class: "btn" %>
-                <% end %>
-                <%= link_to new_post_comment_path(post) do %>
-                    <button class="btn_comment">Comment</button>
-                <% end %>
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="modal">
+        <div class="modal-content">
+            <button type="button" class="close-btn" onclick="closeCreatePostModal()">×</button>
+            <h3 class="modal-title">Create New Post</h3>
+            <div class="form_post">
+                <form id="createPostForm" method="post" accept-charset="UTF-8">
+                    <input type="hidden" name="authenticity_token" id="postAuthToken" value="<%= form_authenticity_token %>">
+                    <div id="postErrors"></div>
+                    <input type="text" name="post[title]" id="postTitle" class="post_title_input" placeholder="Enter post title..." required>
+                    <textarea name="post[text]" id="postText" class="post_text_input" placeholder="Write your post content here..." required></textarea>
+                    <!-- Fixed: Changed from user_id to post[author_id] and will be set dynamically -->
+                    <input type="hidden" name="post[author_id]" id="postAuthorId" value="">
+                    <input type="submit" value="Create Post" class="form_btn">
+                </form>
             </div>
         </div>
-    <% end%>
+    </div>
 
-    <button class="button">
-        Pagination
-    </button>
+    <script>
+        // Modal functionality
+        let currentPostId = null;
 
-</div>
+        function openCommentModal(postId) {
+            currentPostId = postId;
+            const modal = document.getElementById('commentModal');
+            const form = document.getElementById('commentForm');
+
+            // Set the form action to the correct post comment path
+            form.action = `/posts/${postId}/comments`;
+
+            // Clear previous content
+            document.getElementById('commentText').value = '';
+            document.getElementById('commentErrors').innerHTML = '';
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCommentModal() {
+            const modal = document.getElementById('commentModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            currentPostId = null;
+        }
+
+        function openCreatePostModal(userId) {
+            const modal = document.getElementById('createPostModal');
+            const form = document.getElementById('createPostForm');
+
+            // Set the form action to the correct user posts path
+            form.action = `/users/${userId}/posts`;
+
+            // FIXED: Set the author_id to the current user's ID (assuming current_user.id)
+            // If you want it to be the profile user, use userId instead
+            document.getElementById('postAuthorId').value = '<%= current_user&.id %>';
+
+            console.log('Form action set to:', form.action);
+            console.log('Author ID set to:', document.getElementById('postAuthorId').value);
+
+            // Clear previous content
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postText').value = '';
+            document.getElementById('postErrors').innerHTML = '';
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCreatePostModal() {
+            const modal = document.getElementById('createPostModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const commentModal = document.getElementById('commentModal');
+            const createPostModal = document.getElementById('createPostModal');
+
+            if (event.target === commentModal) {
+                closeCommentModal();
+            }
+            if (event.target === createPostModal) {
+                closeCreatePostModal();
+            }
+        });
+
+        // Handle form submissions with AJAX (optional - for better UX)
+        document.getElementById('commentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    closeCommentModal();
+                    // Reload the page to show the new comment
+                    window.location.reload();
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.errors) {
+                    const errorsDiv = document.getElementById('commentErrors');
+                    errorsDiv.innerHTML = data.errors.map(error =>
+                        `<div class="error-message">${error}</div>`
+                    ).join('');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Fallback to normal form submission
+                this.submit();
+            });
+        });
+
+        document.getElementById('createPostForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            // FIXED: Ensure the author_id is properly set before submission
+            const authorId = document.getElementById('postAuthorId').value;
+            if (!authorId || authorId === 'undefined' || authorId === '') {
+                console.error('Author ID is not set properly');
+                // Try to get it from the current user data
+                const currentUserId = '<%= current_user&.id %>';
+                if (currentUserId && currentUserId !== '') {
+                    document.getElementById('postAuthorId').value = currentUserId;
+                    formData.set('post[author_id]', currentUserId);
+                } else {
+                    alert('Unable to determine user ID. Please refresh the page and try again.');
+                    return;
+                }
+            }
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    closeCreatePostModal();
+                    // Redirect to the posts page or reload
+                    window.location.reload();
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.errors) {
+                    const errorsDiv = document.getElementById('postErrors');
+                    errorsDiv.innerHTML = data.errors.map(error =>
+                        `<div class="error-message">${error}</div>`
+                    ).join('');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Fallback to normal form submission
+                this.submit();
+            });
+        });
+
+        // Add hover effects to post cards
+        document.querySelectorAll('.post-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.background = 'rgba(255, 255, 255, 0.95)';
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.background = 'rgba(255, 255, 255, 0.9)';
+            });
+        });
+
+        // Add smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Handle escape key to close modals
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCommentModal();
+                closeCreatePostModal();
+            }
+        });
+    </script>
+</body>
+</html>

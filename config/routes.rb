@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
   default_url_options :host => "example.com"
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
@@ -21,7 +23,7 @@ Rails.application.routes.draw do
 
   delete '/users/:user_id/posts/:post_id', to: 'posts#destroy', as: 'delete_user_post'
   delete '/users/:user_id/posts/:post_id/comments/:comment_id', to: 'comments#destroy', as: 'delete_user_post_comment'
-
+  get '/dashboard', to: 'dashboards#index', as: 'dashboard'
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
       resources :users, only: %i[index show] do

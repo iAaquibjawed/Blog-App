@@ -1,22 +1,34 @@
 class CommentsController < ApplicationController
+  before_action :set_post, only: [:show, :new, :create]
+  before_action :authenticate_user! # or however you handle authentication
+
   def new
-    @comment = Comment.new
-    @post = Post.find(params[:post_id])
-    @user = @post.author
+    @comment = @post.comments.build
   end
 
   def create
-    @comment = Comment.new(comments_params)
+    @comment = @post.comments.build(comment_params)
     @comment.author = current_user
-    @comment.post = Post.find(params[:post_id])
+
     if @comment.save
-      redirect_to user_post_path(@comment.post.author, @comment.post)
+      # Update the post's comments counter
+      @post.increment!(:comments_counter)
+
+      if request.xhr?
+        render json: { success: true, message: 'Comment created successfully' }
+      else
+        redirect_to user_post_path(@post.author, @post), notice: 'Comment created successfully'
+      end
     else
-      render :new
+      if request.xhr?
+        render json: { errors: @comment.errors.full_messages }, status: :unprocessable_entity
+      else
+        render :new
+      end
     end
   end
 
-  def destroy
+    def destroy
     @user = User.find_by(id: params[:user_id])
     @post = @user.posts.find_by(id: params[:post_id])
     @comment = @post.comments.find_by(id: params[:comment_id])
@@ -32,7 +44,11 @@ class CommentsController < ApplicationController
 
   private
 
-  def comments_params
+  def set_post
+    @post = Post.find(params[:post_id])
+  end
+
+  def comment_params
     params.require(:comment).permit(:text)
   end
 end

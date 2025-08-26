@@ -50,3 +50,4 @@ Like.create([
 ])
 
 p "Created #{Like.count} Likes"
+AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?

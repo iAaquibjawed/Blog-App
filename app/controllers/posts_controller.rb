@@ -15,17 +15,39 @@ class PostsController < ApplicationController
     @post = Post.new
   end
 
-  def create
-    @post = Post.new(post_params)
-    @post.comments_counter = 0
-    @post.likes_counter = 0
-    @post.author = current_user
-    if @post.save
+def create
+  byebug
+  if params[:post][:author_id].present?
+    @user = User.find(params[:post][:author_id])
+    if params[:likes_counter].present? && params[:comments_counter].present?
+      @post = @user.posts.build(post_params)
+    else
+      params.merge!(likes_counter: 0, comments_counter: 0)
+      @post = @user.posts.build(post_params)
+    end
+  else
+    @post = current_user.posts.build(post_params)
+  end
+
+  @post.author = current_user
+
+  if @post.save
+    # Update user's posts counter
+    current_user.increment!(:posts_counter)
+
+    if request.xhr?
+      render json: { success: true }
+    else
       redirect_to user_posts_path(current_user)
+    end
+  else
+    if request.xhr?
+      render json: { errors: @post.errors.full_messages }
     else
       render :new
     end
   end
+end
 
   def destroy
     @post = Post.find_by(author_id: params[:user_id], id: params[:post_id])
@@ -41,6 +63,6 @@ class PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:post).permit(:title, :text, :comments_counter, :likes_counter)
+    params.require(:post).permit(:title, :text, :comments_counter, :likes_counter, :author_id)
   end
 end
